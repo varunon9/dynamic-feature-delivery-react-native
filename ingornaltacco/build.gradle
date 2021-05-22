@@ -36,4 +36,9 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     androidTestImplementation 'androidx.annotation:annotation:1.1.0'
+
+    // react-native: https://reactnative.dev/docs/0.61/integration-with-existing-apps
+    implementation "com.facebook.react:react-native:+" // From node_modules
+    implementation "org.webkit:android-jsc:+"
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
 }
