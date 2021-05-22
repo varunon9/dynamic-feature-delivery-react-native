@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DynamicFeatureDeliveryReactNative</string>
+    <string name="title_ingornaltacco">HostApp</string>
 </resources>
