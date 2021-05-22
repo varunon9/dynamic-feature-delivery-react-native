@@ -37,4 +37,7 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    // needed to implement the on demand install functionality of ingornaltacco module
+    implementation 'com.google.android.play:core:1.10.0'
 }
