@@ -2,6 +2,7 @@ package varunon9.me.dynamicfeature;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
@@ -23,10 +24,16 @@ public class MainActivity extends AppCompatActivity {
     int altAccoSessionId = 0;
     SplitInstallManager splitInstallManager;
 
+    // to show progress
+    private ProgressDialog dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        dialog = new ProgressDialog(this);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
     }
 
     // Creates a listener for request status updates.
@@ -42,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void downloadAltAccoModule() {
+        dialog.setTitle("Downloading host app dynamically");
+        dialog.show();
         // Creates an instance of SplitInstallManager.
         splitInstallManager =
                 SplitInstallManagerFactory.create(this);
@@ -69,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(exception -> {
                     exception.printStackTrace();
+                    dialog.setMessage("Error addOnFailureListener: " + exception.getMessage());
                 });
         // Registers the listener.
         splitInstallManager.registerListener(listener);
@@ -85,10 +95,13 @@ public class MainActivity extends AppCompatActivity {
         switch (state.status()) {
             case SplitInstallSessionStatus.DOWNLOADING:
                 long totalBytes = state.totalBytesToDownload();
-                long progress = state.bytesDownloaded();
+                long downloaded = state.bytesDownloaded();
+                int progressPercentage = (int) (downloaded / totalBytes * 100);
                 // Update progress bar.
                 System.out.println("Remaining bytes: " + totalBytes);
-                System.out.println("Progress: " + progress + "%");
+                String progress = "Progress: " + progressPercentage + "%";
+                System.out.println(progress);
+                dialog.setMessage(progress);
                 break;
 
             case SplitInstallSessionStatus.REQUIRES_USER_CONFIRMATION:
@@ -102,9 +115,12 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IntentSender.SendIntentException e) {
                     e.printStackTrace();
                 }
+                break;
 
             case SplitInstallSessionStatus.INSTALLED:
-
+                if (dialog.isShowing()) {
+                    dialog.dismiss();
+                }
                 // After a module is installed, you can start accessing its content or
                 // fire an intent to start an activity in the installed module.
                 // For other use cases, see access code and resources from installed modules.
@@ -113,6 +129,13 @@ public class MainActivity extends AppCompatActivity {
                 // running on Android 8.0 (API level 26) or higher, you need to
                 // update the app context using the SplitInstallHelper API.
                 switchToHostApp();
+                break;
+            case SplitInstallSessionStatus.FAILED:
+                dialog.setMessage("Failed to download host app" + state.errorCode());
+                break;
+
+            default:
+                dialog.setMessage("Failed to download, unknown error occurred. Status code: " + state.status() + ", Error code: " + state.errorCode());
         }
     }
 
