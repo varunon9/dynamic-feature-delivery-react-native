@@ -8,7 +8,7 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint .",
-    "android-js-bundle": "npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output ./ingornaltacco/src/main/assets/index.android.bundle --assets-dest ./ingornaltacco/src/main/res/"
+    "android-js-bundle": "npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output ../ingornaltacco/src/main/assets/index.android.bundle --assets-dest ../ingornaltacco/src/main/res/"
   },
   "dependencies": {
     "react": "16.9.0",
