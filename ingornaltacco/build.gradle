@@ -79,4 +79,7 @@ dependencies {
         implementation jscFlavor
     }
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
+
+    // to enable SplitCompact
+    implementation 'com.google.android.play:core:1.10.0'
 }

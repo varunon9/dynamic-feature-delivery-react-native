@@ -2,6 +2,7 @@ package com.ingoibibo.ingornaltacco;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -16,6 +17,7 @@ import com.facebook.react.common.LifecycleState;
 import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
+import com.google.android.play.core.splitcompat.SplitCompat;
 
 import java.util.Arrays;
 
@@ -77,6 +79,13 @@ public class AltAccoActivity extends AppCompatActivity implements DefaultHardwar
         if (mReactRootView != null) {
             mReactRootView.unmountReactApplication();
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        // Emulates installation of on demand modules using SplitCompat.
+        SplitCompat.installActivity(this);
     }
 
     @Override

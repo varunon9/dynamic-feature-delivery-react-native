@@ -3,11 +3,13 @@ package varunon9.me.dynamicfeature;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.view.View;
 
+import com.google.android.play.core.splitcompat.SplitCompat;
 import com.google.android.play.core.splitinstall.SplitInstallManager;
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory;
 import com.google.android.play.core.splitinstall.SplitInstallRequest;
@@ -91,12 +93,22 @@ public class MainActivity extends AppCompatActivity {
         splitInstallManager.unregisterListener(listener);
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+
+        // Emulates installation of future on demand modules using SplitCompat.
+        // Necessary to access AltAccoActivity once ingornaltacco module is downloaded
+        // Docs: https://developer.android.com/guide/playcore/feature-delivery/on-demand#access_downloaded_modules
+        SplitCompat.install(this);
+    }
+
     private void onAltAccoModuleStateUpdate(SplitInstallSessionState state) {
         switch (state.status()) {
             case SplitInstallSessionStatus.DOWNLOADING:
                 long totalBytes = state.totalBytesToDownload();
                 long downloaded = state.bytesDownloaded();
-                int progressPercentage = (int) (downloaded / totalBytes * 100);
+                int progressPercentage = (int) ((downloaded / totalBytes) * 100);
                 // Update progress bar.
                 System.out.println("Remaining bytes: " + totalBytes);
                 String progress = "Progress: " + progressPercentage + "%";
@@ -118,9 +130,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case SplitInstallSessionStatus.INSTALLED:
-                if (dialog.isShowing()) {
-                    dialog.dismiss();
-                }
                 // After a module is installed, you can start accessing its content or
                 // fire an intent to start an activity in the installed module.
                 // For other use cases, see access code and resources from installed modules.
@@ -128,6 +137,11 @@ public class MainActivity extends AppCompatActivity {
                 // If the request is an on demand module for an Android Instant App
                 // running on Android 8.0 (API level 26) or higher, you need to
                 // update the app context using the SplitInstallHelper API.
+                switchToHostApp();
+                break;
+            case SplitInstallSessionStatus.DOWNLOADED:
+                System.out.println("Download successful, Installing host app...");
+                dialog.setMessage("Download successful, Installing host app...");
                 switchToHostApp();
                 break;
             case SplitInstallSessionStatus.FAILED:
@@ -140,6 +154,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void switchToHostApp() {
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
         Intent intent = new Intent();
         intent.setClassName("varunon9.me.dynamicfeature", "com.ingoibibo.ingornaltacco.AltAccoActivity");
         startActivity(intent);
