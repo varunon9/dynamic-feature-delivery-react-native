@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     // Initializes a variable to later track the session ID for a given request.
     int altAccoSessionId = 0;
     SplitInstallManager splitInstallManager;
+    SplitInstallStateUpdatedListener listener;
 
     // to show progress
     private ProgressDialog dialog;
@@ -38,59 +39,59 @@ public class MainActivity extends AppCompatActivity {
         dialog.setCanceledOnTouchOutside(false);
     }
 
-    // Creates a listener for request status updates.
-    SplitInstallStateUpdatedListener listener = state -> {
-        if (state.sessionId() == altAccoSessionId) {
-            // Read the status of the request to handle the state update.
-            onAltAccoModuleStateUpdate(state);
-        }
-    };
-
     public void onVisitHostAppClick(View view) {
-        downloadAltAccoModule();
+        checkAndDownloadAltAccoModule();
     }
 
-    private void downloadAltAccoModule() {
-        dialog.setTitle("Downloading host app dynamically");
-        dialog.show();
+    private void checkAndDownloadAltAccoModule() {
         // Creates an instance of SplitInstallManager.
         splitInstallManager =
                 SplitInstallManagerFactory.create(this);
+        String altAccoModule = "ingornaltacco";
+        if (!splitInstallManager.getInstalledModules().contains(altAccoModule)) {
+            dialog.setTitle("Downloading host app dynamically");
+            dialog.show();
 
-        // Creates a request to install a module.
-        SplitInstallRequest request =
-                SplitInstallRequest
-                        .newBuilder()
-                        // You can download multiple on demand modules per
-                        // request by invoking the following method for each
-                        // module you want to install.
-                        .addModule("ingornaltacco")
-                        .build();
+            // Creates a request to install a module.
+            SplitInstallRequest request =
+                    SplitInstallRequest
+                            .newBuilder()
+                            // You can download multiple on demand modules per
+                            // request by invoking the following method for each
+                            // module you want to install.
+                            .addModule(altAccoModule)
+                            .build();
 
-        splitInstallManager
-                // Submits the request to install the module through the
-                // asynchronous startInstall() task. Your app needs to be
-                // in the foreground to submit the request.
-                .startInstall(request)
-                // You should also be able to gracefully handle
-                // request state changes and errors. To learn more, go to
-                // the section about how to Monitor the request state.
-                .addOnSuccessListener(sessionId -> {
-                    altAccoSessionId = sessionId;
-                })
-                .addOnFailureListener(exception -> {
-                    exception.printStackTrace();
-                    dialog.setMessage("Error addOnFailureListener: " + exception.getMessage());
-                });
-        // Registers the listener.
-        splitInstallManager.registerListener(listener);
-    }
+            // Creates a listener for request status updates.
+            listener = state -> {
+                if (state.sessionId() == altAccoSessionId) {
+                    // Read the status of the request to handle the state update.
+                    onAltAccoModuleStateUpdate(state);
+                }
+            };
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // When your app no longer requires further updates, unregister the listener.
-        splitInstallManager.unregisterListener(listener);
+            splitInstallManager
+                    // Submits the request to install the module through the
+                    // asynchronous startInstall() task. Your app needs to be
+                    // in the foreground to submit the request.
+                    .startInstall(request)
+                    // You should also be able to gracefully handle
+                    // request state changes and errors. To learn more, go to
+                    // the section about how to Monitor the request state.
+                    .addOnSuccessListener(sessionId -> {
+                        // should not launch activity here, as success doesn't mean the module is installed
+                        // listen to SplitInstallStateUpdatedListener event instead
+                        altAccoSessionId = sessionId;
+                    })
+                    .addOnFailureListener(exception -> {
+                        exception.printStackTrace();
+                        dialog.setMessage("Error addOnFailureListener: " + exception.getMessage());
+                    });
+            // Registers the listener.
+            splitInstallManager.registerListener(listener);
+        } else {
+            switchToHostApp();
+        }
     }
 
     @Override
@@ -100,20 +101,20 @@ public class MainActivity extends AppCompatActivity {
         // Emulates installation of future on demand modules using SplitCompat.
         // Necessary to access AltAccoActivity once ingornaltacco module is downloaded
         // Docs: https://developer.android.com/guide/playcore/feature-delivery/on-demand#access_downloaded_modules
-        SplitCompat.install(this);
+        SplitCompat.installActivity(this);
     }
 
     private void onAltAccoModuleStateUpdate(SplitInstallSessionState state) {
         switch (state.status()) {
             case SplitInstallSessionStatus.DOWNLOADING:
-                long totalBytes = state.totalBytesToDownload();
-                long downloaded = state.bytesDownloaded();
-                int progressPercentage = (int) ((downloaded / totalBytes) * 100);
+                long totalKiloBytes = state.totalBytesToDownload() / 1024;
+                long kiloBytesDownloaded = state.bytesDownloaded() / 1024;
+                long progressPercentage = kiloBytesDownloaded * 100 / totalKiloBytes;
                 // Update progress bar.
-                System.out.println("Remaining bytes: " + totalBytes);
-                String progress = "Progress: " + progressPercentage + "%";
-                System.out.println(progress);
-                dialog.setMessage(progress);
+                String progressMessage = String.format("Total size: %dKB, Progress: %d%%", totalKiloBytes, progressPercentage);
+                System.out.println("totalKiloBytes: " + totalKiloBytes + ", kiloBytesDownloaded: " + kiloBytesDownloaded);
+                System.out.println(progressMessage);
+                dialog.setMessage(progressMessage);
                 break;
 
             case SplitInstallSessionStatus.REQUIRES_USER_CONFIRMATION:
@@ -137,19 +138,34 @@ public class MainActivity extends AppCompatActivity {
                 // If the request is an on demand module for an Android Instant App
                 // running on Android 8.0 (API level 26) or higher, you need to
                 // update the app context using the SplitInstallHelper API.
+                splitInstallManager.unregisterListener(listener);
                 switchToHostApp();
                 break;
             case SplitInstallSessionStatus.DOWNLOADED:
-                System.out.println("Download successful, Installing host app...");
-                dialog.setMessage("Download successful, Installing host app...");
+                System.out.println("Download successful");
+                dialog.setMessage("Download successful");
+                splitInstallManager.unregisterListener(listener);
                 switchToHostApp();
                 break;
             case SplitInstallSessionStatus.FAILED:
-                dialog.setMessage("Failed to download host app" + state.errorCode());
+                System.out.println("Failed to download host app, error code:  " + state.errorCode());
+                dialog.setMessage("Failed to download host app, error code: " + state.errorCode());
+                splitInstallManager.unregisterListener(listener);
+                break;
+
+            case SplitInstallSessionStatus.PENDING:
+                System.out.println("Waiting for the download to begin");
+                dialog.setMessage("Waiting for the download to begin");
+                break;
+
+            case SplitInstallSessionStatus.INSTALLING:
+                System.out.println("Installing host app...");
+                dialog.setMessage("Installing host app...");
                 break;
 
             default:
                 dialog.setMessage("Failed to download, unknown error occurred. Status code: " + state.status() + ", Error code: " + state.errorCode());
+                splitInstallManager.unregisterListener(listener);
         }
     }
 
@@ -158,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
             dialog.dismiss();
         }
         Intent intent = new Intent();
-        intent.setClassName("varunon9.me.dynamicfeature", "com.ingoibibo.ingornaltacco.AltAccoActivity");
+        intent.setClassName(BuildConfig.APPLICATION_ID, "com.ingoibibo.ingornaltacco.AltAccoActivity");
         startActivity(intent);
     }
 }
