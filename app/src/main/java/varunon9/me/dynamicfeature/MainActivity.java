@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     int altAccoSessionId = 0;
     SplitInstallManager splitInstallManager;
     SplitInstallStateUpdatedListener listener;
+    private static final String ALT_ACCO_MODULE = "ingornaltacco";
 
     // to show progress
     private ProgressDialog dialog;
@@ -47,8 +48,7 @@ public class MainActivity extends AppCompatActivity {
         // Creates an instance of SplitInstallManager.
         splitInstallManager =
                 SplitInstallManagerFactory.create(this);
-        String altAccoModule = "ingornaltacco";
-        if (!splitInstallManager.getInstalledModules().contains(altAccoModule)) {
+        if (!splitInstallManager.getInstalledModules().contains(ALT_ACCO_MODULE)) {
             dialog.setTitle("Downloading host app dynamically");
             dialog.show();
 
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                             // You can download multiple on demand modules per
                             // request by invoking the following method for each
                             // module you want to install.
-                            .addModule(altAccoModule)
+                            .addModule(ALT_ACCO_MODULE)
                             .build();
 
             // Creates a listener for request status updates.
@@ -170,11 +170,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void switchToHostApp() {
-        if (dialog.isShowing()) {
-            dialog.dismiss();
+        if (splitInstallManager.getInstalledModules().contains(ALT_ACCO_MODULE)) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+            Intent intent = new Intent();
+            intent.setClassName(BuildConfig.APPLICATION_ID, "com.ingoibibo.ingornaltacco.AltAccoActivity");
+            startActivity(intent);
+        } else {
+            dialog.setMessage("Host app is not installed");
         }
-        Intent intent = new Intent();
-        intent.setClassName(BuildConfig.APPLICATION_ID, "com.ingoibibo.ingornaltacco.AltAccoActivity");
-        startActivity(intent);
     }
 }
