@@ -73,7 +73,28 @@ const App: () => Node = () => {
           <Image source={approvedIcon} style={{width: 60, height: 60}} />
         </View>
         <Text>Learniti icon:</Text>
-        <Image source={{uri: 'https://learniti.com/images/google-play.png'}} style={{width: 194, height: 64}} />
+        <Image 
+          source={{uri: 'https://learniti.com/images/google-play.png'}} 
+          style={{width: 194, height: 64}} 
+        />
+        <Text>This is a normal Text</Text>
+        <Text style={styles.semiBold}>This is a semi bold Text</Text>
+        <Text style={styles.bold}>This is a bold Text</Text>
+        <Text style={styles.happyHotels}>
+          phone-24x7 {String.fromCharCode(0xe900)}
+        </Text>
+        <Text style={styles.happyHotels}>
+          alarm-bell {String.fromCharCode(0xe903)}
+        </Text>
+        <Text style={styles.happyHotels}>
+          double-bed {String.fromCharCode(0xe912)}
+        </Text>
+        <Text style={styles.happyHotels}>
+          briefcase {String.fromCharCode(0xe917)}
+        </Text>
+        <Text allowFontScaling={false} style={styles.happyHotels}>
+          airport {String.fromCharCode(0xe902)}
+        </Text>
         <Header />
         <View
           style={{
@@ -116,6 +137,16 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
+  semiBold: {
+    fontFamily: 'Roboto-Medium'
+  },
+  bold: {
+    fontWeight: 'bold'
+  },
+  happyHotels: {
+    fontFamily: 'happyHotels',
+    fontSize: 48
+  }
 });
 
 export default App;
