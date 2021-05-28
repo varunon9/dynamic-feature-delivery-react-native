@@ -3,6 +3,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file(POCAPP_RELEASE_STORE_FILE)
+            storePassword POCAPP_RELEASE_STORE_PASSWORD
+            keyAlias POCAPP_RELEASE_KEY_ALIAS
+            keyPassword POCAPP_RELEASE_KEY_PASSWORD
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
@@ -14,6 +22,7 @@ android {
         versionName "1.13"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.release
     }
 
     buildTypes {

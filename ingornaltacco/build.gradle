@@ -35,6 +35,14 @@ def jscFlavor = "org.webkit:android-jsc:+"
 def enableHermes = project.ext.react.get("enableHermes", false);
 
 android {
+    signingConfigs {
+        release {
+            storeFile file(POCAPP_RELEASE_STORE_FILE)
+            storePassword POCAPP_RELEASE_STORE_PASSWORD
+            keyAlias POCAPP_RELEASE_KEY_ALIAS
+            keyPassword POCAPP_RELEASE_KEY_PASSWORD
+        }
+    }
     compileSdkVersion 30
 
     compileOptions {
@@ -50,10 +58,12 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.release
     }
 
     buildTypes {
         release {
+            shrinkResources false
             minifyEnabled false
             //proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

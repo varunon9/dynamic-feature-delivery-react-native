@@ -9,6 +9,7 @@
 import React from 'react';
 import type {Node} from 'react';
 import {
+  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -25,6 +26,8 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
+const approvedIcon = require('./src/images/approved.png');
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -65,6 +68,12 @@ const App: () => Node = () => {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
+        <Text>Approved icon:</Text>
+        <View style={{borderWidth: 1, borderColor: 'blue'}}>
+          <Image source={approvedIcon} style={{width: 60, height: 60}} />
+        </View>
+        <Text>Learniti icon:</Text>
+        <Image source={{uri: 'https://learniti.com/images/google-play.png'}} style={{width: 194, height: 64}} />
         <Header />
         <View
           style={{
