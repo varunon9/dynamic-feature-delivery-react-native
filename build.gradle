@@ -26,6 +26,11 @@ allprojects {
             // Android JSC is installed from npm
             url("$rootDir/INGO-RN-AltAccoJS/node_modules/jsc-android/dist")
         }
+
+        // https://github.com/facebook/SoLoader/issues/19
+        flatDir {
+            dirs 'src/main/libs/'
+        }
     }
 }
 

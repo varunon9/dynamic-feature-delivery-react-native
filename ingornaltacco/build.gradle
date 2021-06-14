@@ -80,8 +80,15 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     androidTestImplementation 'androidx.annotation:annotation:1.1.0'
 
-    // react-native: https://reactnative.dev/docs/0.61/integration-with-existing-apps
-    implementation 'com.facebook.react:react-native:+' // From node_modules
+    // react-native: https://reactnative.dev/docs/integration-with-existing-apps
+    //implementation 'com.facebook.react:react-native:+' // From node_modules
+
+    // https://github.com/facebook/SoLoader/issues/19
+    implementation ('com.facebook.react:react-native:+') {
+        exclude group: 'com.facebook.soloader', module: 'soloader'
+    }
+    implementation name: 'soloader-0.8.2-voize', ext: 'aar'
+
     if (enableHermes) {
         def hermesPath = "$rootDir/INGO-RN-AltAccoJS/node_modules/hermes-engine/android/";
         debugImplementation files(hermesPath + "hermes-debug.aar")

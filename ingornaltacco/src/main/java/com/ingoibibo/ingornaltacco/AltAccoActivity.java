@@ -32,7 +32,7 @@ public class AltAccoActivity extends AppCompatActivity implements DefaultHardwar
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alt_acco);
-        checkAndAskForOverlayPermission();
+        //checkAndAskForOverlayPermission();
         loadReactNativeApp();
     }
 

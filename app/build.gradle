@@ -18,8 +18,8 @@ android {
         applicationId "varunon9.me.dynamicfeature"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 13
-        versionName "1.13"
+        versionCode 14
+        versionName "1.14"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
